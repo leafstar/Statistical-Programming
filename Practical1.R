@@ -7,7 +7,7 @@ a <- scan("1581-0.txt",what="character",skip=156)
 n <- length(a)
 a <- a[-((n-2909):n)] ## strip license
 
-## define a function to split the punctuations.
+## define a function to split the punctuation.
 split_punct <- function(words,punc){
   index = grep(punc,words,fixed = TRUE)
   words_new <-rep(0,length(words)+length(index))
@@ -56,13 +56,32 @@ while(abs(sum(freq >= median)-m) > 0){
 }
 
 filtered_index = which(freq>=threshold)
-bible_text = as.vector(unique_words[[1]])
-word_vector = bible_text[filtered_index]
+unique_words_vec = as.vector(unique_words[[1]])
+
+## b is the most common word vector
+b = unique_words_vec[filtered_index]
 
 ## Question 7a
-match(bible_text,word_vector)
+
+col1 = match(tolower(a),b)
+
+index_matrix = cbind(col1[1:length(col1)-1],col1[2:length(col1)])
+
+pair_matrix = index_matrix[!is.na(rowSums(index_matrix)),]
 
 
+## create a matrix A
+max_ind = max(pair_matrix) # get the 
+A = matrix(0, max_ind, max_ind)
+for (row in 1:nrow(pair_matrix)){
+  i <- pair_matrix[row,1] # get the target index of column
+  j <- pair_matrix[row,2] # get the target index of rol
+  A[i,j] = A[i,j] + 1
+}
+
+for (row in 1:nrow(A)){
+  A[row,] = A[row,] / sum(A[row,])
+}
 
 
 #end_time <- Sys.time()
