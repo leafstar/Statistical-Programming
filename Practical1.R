@@ -1,5 +1,5 @@
-## Students:Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
-## set the working directory (where the 1581 is)
+## Students: Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
+## set the working directory
 setwd("/Users/muxingwang/OneDrive - University of Edinburgh/StatisticalProgramming/git-repo/Statistical-Programming")
 
 ## scan the file in to object a
@@ -8,20 +8,20 @@ n <- length(a)
 a <- a[-((n-2909):n)] ## strip license
 
 ## define a function to split the punctuation.
-split_punct <- function(words,punc){
+split_punct <- function(words,punc){   
   index = grep(punc,words,fixed = TRUE)
   words_new <-rep(0,length(words)+length(index))
   new_index = index+1:length(index)
   words_new[new_index] = punc
   words_new[-new_index] = gsub(punc,"",words, fixed = TRUE)
   words_new
-}
+}   ## we Don't get any result here, when we run all of these together.  
 
-## split the bible for each punctuation in the list of punctuations
+## split the bible for each punctuation in the list of punctuation
 punc_list = c(",", ".", ";", "!", ":", "?")
 for (punc in punc_list){
   a = split_punct(words = a, punc)
-}
+} ## Also no results here when run together. 
 
 ## load the library 'mgcv'
 library(mgcv)
@@ -29,7 +29,7 @@ library(mgcv)
 ## get the 
 unique_words = uniquecombs(tolower(a))
 ind = attr(unique_words,"index")
-freq = tabulate(ind)
+freq = tabulate(ind) ## it says error in tabulation. 
 
 ## search for the top 1000 frequent words
 lower_bound = min(freq) #hduhdsd
