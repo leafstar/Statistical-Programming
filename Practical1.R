@@ -1,6 +1,9 @@
 ## Students: Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
 ## set the working directory
 setwd("/Users/muxingwang/OneDrive - University of Edinburgh/StatisticalProgramming/git-repo/Statistical-Programming")
+## Students:Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
+## set the working directory
+##setwd("C:/Users/karla/OneDrive/Escritorio/Statistical Programming/Task 1/Statistical-Programming/Statistical-Programming")
 
 ## scan the file in to object a
 a <- scan("1581-0.txt",what="character",skip=156)
@@ -9,30 +12,31 @@ a <- a[-((n-2909):n)] ## strip license
 
 ## define a function to split the punctuation.
 split_punct <- function(words,punc){   
-  index = grep(punc,words,fixed = TRUE)
-  words_new <-rep(0,length(words)+length(index))
+  index = grep(punc,words,fixed = TRUE)           #Find indices of the words in punc and words
+  words_new <-rep(0,length(words)+length(index))  #creates a vector of zeroes
   new_index = index+1:length(index)
   words_new[new_index] = punc
-  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE)
+  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE) # remove the commas and full stops
   words_new
-}   ## we Don't get any result here, when we run all of these together.  
+}   
+## we don't get any result, as this is just a function  
 
-## split the bible for each punctuation in the list of punctuation
-punc_list = c(",", ".", ";", "!", ":", "?")
+## Split the bible for each punctuation in the list of punctuation
+punc_list = c(",", ".", ";", "!", ":", "?")   #create a vector of the punctuations
 for (punc in punc_list){
-  a = split_punct(words = a, punc)
+  a = split_punct(words = a, punc)     #This function splits a string based on various options.
 } ## Also no results here when run together. 
 
 ## load the library 'mgcv'
 library(mgcv)
 
 ## get the 
-unique_words = uniquecombs(tolower(a))
-ind = attr(unique_words,"index")
+unique_words = uniquecombs(tolower(a))  #Convert texts to lower case
+ind = attr(unique_words,"index")      #to know the attributes of the variable unique words
 freq = tabulate(ind) ## it says error in tabulation. 
 
 ## search for the top 1000 frequent words
-lower_bound = min(freq) #hduhdsd
+lower_bound = min(freq) 
 upper_bound = max(freq)
 threshold = 0
 median = 0
