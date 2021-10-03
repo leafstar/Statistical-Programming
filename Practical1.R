@@ -1,6 +1,6 @@
 ## Students:Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
 ## set the working directory
-setwd("/Users/muxingwang/OneDrive - University of Edinburgh/StatisticalProgramming/git-repo/Statistical-Programming")
+setwd("../Statistical-Programming")
 
 ## scan the file in to object a
 a <- scan("1581-0.txt",what="character",skip=156)
@@ -83,6 +83,27 @@ for (row in 1:nrow(A)){
   A[row,] = A[row,] / sum(A[row,])
 }
 
+## Question 8
+## simulating 50 words
 
-#end_time <- Sys.time()
-#end_time - start_time
+simulation <- function (number_of_words){
+  starting_index = sample(1:1004,size = 1) # randomly pick an entry index
+  simulated_text_indices = 1:number_of_words # initialize the indices vector to store all the word indices during simulation
+  simulated_text_indices[1] = starting_index # initialize the first index to the starting_index we just got
+  cursor = starting_index # initialize a cursor as the index
+  
+  ##
+  ## simulation begins
+  for (i in 2:number_of_words){
+    next_word_index = sample(1:1004,size = 1,prob = A[cursor,]) # random sampling the next word's index
+    simulated_text_indices[i] = next_word_index # update the corresponding word index in our vector simulated_text_indices
+    cursor = next_word_index # move cursor to the next index and continue generating new index from there
+  }
+  
+  for (i in simulated_text_indices){
+    cat(paste(b[i],""))
+  }
+}
+
+number_of_words = 50 # number of words that we want to simulate
+simulation(number_of_words)
