@@ -1,31 +1,29 @@
 ## Students: Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
 ## set the working directory
 setwd("/Users/muxingwang/OneDrive - University of Edinburgh/StatisticalProgramming/git-repo/Statistical-Programming")
-## Students:Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
-## set the working directory
-##setwd("C:/Users/karla/OneDrive/Escritorio/Statistical Programming/Task 1/Statistical-Programming/Statistical-Programming")
 
 ## scan the file in to object a
-a <- scan("1581-0.txt",what="character",skip=156)
-n <- length(a)
-a <- a[-((n-2909):n)] ## strip license
+a <- scan("1581-0.txt",what="character",skip=156)           ## Read items
+n <- length(a)                                              ## Measuring length of  "a"
+a <- a[-((n-2909):n)]                                       ## strip license
+a<-                                                         ## Check out what is in "a"                                                        
 
 ## define a function to split the punctuation.
 split_punct <- function(words,punc){   
-  index = grep(punc,words,fixed = TRUE)           #Find indices of the words in punc and words
-  words_new <-rep(0,length(words)+length(index))  #creates a vector of zeroes
-  new_index = index+1:length(index)
-  words_new[new_index] = punc
-  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE) # remove the commas and full stops
-  words_new
-}   
-## we don't get any result, as this is just a function  
+  index = grep(punc,words,fixed = TRUE)                     ## finds the indices of the words containing punctuation marks in words
+  words_new <-rep(0,length(words)+length(index))            ## creates a vector of zeroes
+  new_index = index+1:length(index)                         ## finds location for the words containing the punctuation marks in words_new
+  words_new[new_index] = punc                               ## inserts words with punctuation marks in words_new
+  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE) ## removes punctuation marks from the word and inserts in ""
+  words_new }                                               ## print words_new 
+(## If we run it we will have zeros besides the words with punctuation marks, but we also want all other words to be in the string??)
 
-## Split the bible for each punctuation in the list of punctuation
-punc_list = c(",", ".", ";", "!", ":", "?")   #create a vector of the punctuations
+
+## Use split_punct function to separate the punctuation marks from words.
+punc_list = c(",", ".", ";", "!", ":", "?")         ## create a vector of the punctuations
 for (punc in punc_list){
-  a = split_punct(words = a, punc)     #This function splits a string based on various options.
-} ## Also no results here when run together. 
+  a = split_punct(words = a, punc)                  ## This function splits a string based on various options.
+} ## Why do we need loop here? can't we separate the punctuation marks without it? 
 
 ## load the library 'mgcv'
 library(mgcv)
