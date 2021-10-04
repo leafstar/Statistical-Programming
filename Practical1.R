@@ -24,8 +24,9 @@ for (punc in punc_list){
 }
 
 ## get the 
-unique_words = unique(tolower(a))
-ind = match(tolower(a),unique_words)
+a_lower = tolower(a)
+unique_words = unique(a_lower)
+ind = match(a_lower,unique_words)
 freq = tabulate(ind)
 
 ## search for the top 1000 frequent words
@@ -58,7 +59,7 @@ b = unique_words[filtered_index]
 
 ## Question 7a
 
-col1 = match(tolower(a),b)
+col1 = match(a_lower,b)
 
 index_matrix = cbind(col1[1:length(col1)-1],col1[2:length(col1)])
 
@@ -79,15 +80,18 @@ for (row in 1:nrow(A)){
   A[row,] = A[row,] / sum(A[row,])
 }
 
-## Question 8
+## Question 8&9
 ## simulating 50 words
+
+upper_match = match(a,b)
+indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.5)
+
 
 simulation <- function (number_of_words){
   starting_index = sample(1:1004,size = 1) # randomly pick an entry index from b
   simulated_text_indices = 1:number_of_words # initialize the indices vector to store all the word indices during simulation
   simulated_text_indices[1] = starting_index # initialize the first index to the starting_index we just got
   cursor = starting_index # initialize a cursor as the index
-  
   ##
   ## simulation begins
   for (i in 2:number_of_words){
@@ -97,19 +101,16 @@ simulation <- function (number_of_words){
   }
   
   for (i in simulated_text_indices){
-    cat(b[i])
+    if (i %in% indices_modi){
+      cat(toupper(substring(b[i], 1, 1)))
+      cat(substring(b[i], 2, nchar(b[i])))
+    }
+    else{
+      cat(b[i])
+    }
     cat(" ")
   }
 }
 
 number_of_words = 50 # number of words that we want to simulate
 simulation(number_of_words)
-
-## Question 9
-## 
-
-
-
-
-#end_time <- Sys.time()
-#end_time - start_time
