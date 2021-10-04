@@ -1,37 +1,32 @@
-## Students: Muxing Wang (S2201749) Karla Vega (s2126801) Nutsa Tokhadze (s1778736) Work Group 3. 
+#start_time <- Sys.time()
 ## set the working directory
-setwd("/Users/muxingwang/OneDrive - University of Edinburgh/StatisticalProgramming/git-repo/Statistical-Programming")
+setwd("../Statistical-Programming")
 
 ## scan the file in to object a
-a <- scan("1581-0.txt",what="character",skip=156)           ## Read items
-n <- length(a)                                              ## Measuring length of  "a"
-a <- a[-((n-2909):n)]                                       ## strip license
-a<-                                                         ## Check out what is in "a"                                                        
+a <- scan("1581-0.txt",what="character",skip=156)
+n <- length(a)
+a <- a[-((n-2909):n)] ## strip license
 
 ## define a function to split the punctuation.
-split_punct <- function(words,punc){   
-  index = grep(punc,words,fixed = TRUE)                     ## finds the indices of the words containing punctuation marks in words
-  words_new <-rep(0,length(words)+length(index))            ## creates a vector of zeroes
-  new_index = index+1:length(index)                         ## finds location for the words containing the punctuation marks in words_new
-  words_new[new_index] = punc                               ## inserts words with punctuation marks in words_new
-  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE) ## removes punctuation marks from the word and inserts in ""
-  words_new }                                               ## print words_new 
-(## If we run it we will have zeros besides the words with punctuation marks, but we also want all other words to be in the string??)
+split_punct <- function(words,punc){
+  index = grep(punc,words,fixed = TRUE)
+  words_new <-rep(0,length(words)+length(index))
+  new_index = index+1:length(index)
+  words_new[new_index] = punc
+  words_new[-new_index] = gsub(punc,"",words, fixed = TRUE)
+  words_new
+}
 
-
-## Use split_punct function to separate the punctuation marks from words.
-punc_list = c(",", ".", ";", "!", ":", "?")         ## create a vector of the punctuations
+## split the bible for each punctuation in the list of punctuation
+punc_list = c(",", ".", ";", "!", ":", "?")
 for (punc in punc_list){
-  a = split_punct(words = a, punc)                  ## This function splits a string based on various options.
-} ## Why do we need loop here? can't we separate the punctuation marks without it? 
-
-## load the library 'mgcv'
-library(mgcv)
+  a = split_punct(words = a, punc)
+}
 
 ## get the 
-unique_words = uniquecombs(tolower(a))  #Convert texts to lower case
-ind = attr(unique_words,"index")      #to know the attributes of the variable unique words
-freq = tabulate(ind) ## it says error in tabulation. 
+unique_words = unique(tolower(a))
+ind = match(tolower(a),unique_words)
+freq = tabulate(ind)
 
 ## search for the top 1000 frequent words
 lower_bound = min(freq) 
@@ -54,14 +49,12 @@ while(abs(sum(freq >= median)-m) > 0){
   }else{
     upper_bound = median
   }
-  print(c(lower_bound, upper_bound, sum(freq >= lower_bound),sum(freq >= upper_bound)))
 }
 
 filtered_index = which(freq>=threshold)
-unique_words_vec = as.vector(unique_words[[1]])
 
 ## b is the most common word vector
-b = unique_words_vec[filtered_index]
+b = unique_words[filtered_index]
 
 ## Question 7a
 
@@ -81,9 +74,41 @@ for (row in 1:nrow(pair_matrix)){
   A[i,j] = A[i,j] + 1
 }
 
+## Normalizing the rows of matrix A.
 for (row in 1:nrow(A)){
   A[row,] = A[row,] / sum(A[row,])
 }
+
+## Question 8
+## simulating 50 words
+
+simulation <- function (number_of_words){
+  starting_index = sample(1:1004,size = 1) # randomly pick an entry index from b
+  simulated_text_indices = 1:number_of_words # initialize the indices vector to store all the word indices during simulation
+  simulated_text_indices[1] = starting_index # initialize the first index to the starting_index we just got
+  cursor = starting_index # initialize a cursor as the index
+  
+  ##
+  ## simulation begins
+  for (i in 2:number_of_words){
+    next_word_index = sample(1:1004, size = 1, prob = A[cursor,]) # random sampling the next word's index
+    simulated_text_indices[i] = next_word_index # update the corresponding word index in our vector simulated_text_indices
+    cursor = next_word_index # move cursor to the next index and continue generating new index from there
+  }
+  
+  for (i in simulated_text_indices){
+    cat(b[i])
+    cat(" ")
+  }
+}
+
+number_of_words = 50 # number of words that we want to simulate
+simulation(number_of_words)
+
+## Question 9
+## 
+
+
 
 
 #end_time <- Sys.time()
