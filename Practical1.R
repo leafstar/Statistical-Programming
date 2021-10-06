@@ -95,7 +95,7 @@ for (row in 1:nrow(A)){                                           ## loop create
 
 ## this part is to determine which words should start with a capital letter.
 upper_match = match(a,b)                                          ## Match the main text(has upper case words) with Unique words
-indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.5)   ## a vector contains indices of words should start with capital letters.
+indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.5) ## a vector contains indices of words should start with capital letters.
 
 ## "simulation" takes the number of words we want to simulate, 
 ## and returns the simulated text based on the probabilty matrix "A".
