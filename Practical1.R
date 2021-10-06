@@ -1,6 +1,5 @@
-#start_time <- Sys.time()
 ## set the working directory
-setwd("C:/Users/karla/OneDrive/Escritorio/Statistical Programming/Task 1/Statistical-Programming/Statistical-Programming")
+setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 ## scan the file in to object a
 a <- scan("1581-0.txt",what="character",skip=156)                 ## scans the file
@@ -37,7 +36,7 @@ median = 0                                                        ## Inicialized
 m = 1000
 while(abs(sum(freq >= median)-m) > 0){                            ## while to find the upper and lower bounds 
   if (upper_bound == lower_bound + 1){
-    if (abs(sum(freq >= upper_bound)-1000) <= abs(sum(freq >= lower_bound)-1000)){  ##Specification of the limit of the bounces
+    if (abs(sum(freq >= upper_bound) - m) <= abs(sum(freq >= lower_bound) - m)){  ##Specification of the limit of the bounces
       threshold = upper_bound                                     ##Update the bounds
     }else{
       threshold = lower_bound                                     ##Update the bounds
@@ -45,7 +44,7 @@ while(abs(sum(freq >= median)-m) > 0){                            ## while to fi
     break()
   }
   median =floor((lower_bound + upper_bound)/2)                    ##rounds the value obtained from the calculation of bounds
-  if(sum(freq >= median) > 1000){
+  if(sum(freq >= median) > m){
     lower_bound = median
   }else{
     upper_bound = median
@@ -88,14 +87,14 @@ indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.
 
 
 simulation <- function (number_of_words){
-  starting_index = sample(1:1004,size = 1)                        ## randomly pick an entry index from b
+  starting_index = sample(1:length(b),size = 1)                        ## randomly pick an entry index from b
   simulated_text_indices = 1:number_of_words                      ## Establish the length of the text to be printed
   simulated_text_indices[1] = starting_index                      ## Put the word selected in the first position
   cursor = starting_index                                         ## initialize a cursor as the index
   ##
   ## simulation begins
   for (i in 2:number_of_words){                                   ##Starts to pick the following words, in the position 2, as the first is already choose
-    next_word_index = sample(1:1004, size = 1, prob = A[cursor,]) ## random sampling the next word's index
+    next_word_index = sample(1:length(b), size = 1, prob = A[cursor,]) ## random sampling the next word's index
     simulated_text_indices[i] = next_word_index                   ## update the corresponding word index in our vector simulated_text_indices
     cursor = next_word_index                                      ## move cursor to the next index and continue generating new index from there
   }
