@@ -73,7 +73,7 @@ col1 = match(a_lower,b)                                            ## matches el
 
 index_matrix = cbind(col1[1:length(col1)-1],col1[2:length(col1)])  ## matrix created with de col1 vector, the second column is also the col1 but traversed one position up 
 
-pair_matrix = index_matrix[!is.na(rowSums(index_matrix)),]         ## drops word pairs containing NA from the matrix created in line 64
+pair_matrix = index_matrix[!is.na(rowSums(index_matrix)),]         ## drops word pairs containing NA from the matrix
 
 
 ## create a matrix A whose entry A[i,j] will be the probability of word b[i] followed by b[j].
@@ -95,10 +95,10 @@ for (row in 1:nrow(A)){                                           ## loop create
 
 ## this part is to determine which words should start with a capital letter.
 upper_match = match(a,b)                                          ## Match the main text(has upper case words) with Unique words
-indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.5)   # a vector contains indices of words should start with capital letters.
+indices_modi = which((tabulate(col1) - tabulate(upper_match))/tabulate(col1)>=0.5)   ## a vector contains indices of words should start with capital letters.
 
 ## "simulation" takes the number of words we want to simulate, 
-##and returns the simulated text based on the probabilty matrix "A".
+## and returns the simulated text based on the probabilty matrix "A".
 simulation <- function (number_of_words){
   starting_index = sample(1:length(b),size = 1)                   ## randomly pick an entry index from b
   simulated_text_indices = 1:number_of_words                      ## a vector to store the indices of simulated words.
@@ -106,7 +106,7 @@ simulation <- function (number_of_words){
   cursor = starting_index                                         ## initialize a cursor as the index
 
   ## simulation begins
-  for (i in 2:number_of_words){                                   ##Starts to pick the following words, in the position 2, as the first is already choose
+  for (i in 2:number_of_words){                                   ## starts to pick the following words, in the position 2, as the first is already chosen
     next_word_index = sample(1:length(b), size = 1, prob = A[cursor,]) ## random sampling the next word's index
     simulated_text_indices[i] = next_word_index                   ## update the corresponding word index in our vector "simulated_text_indices"
     cursor = next_word_index                                      ## move cursor to the next index and continue generating new index from there
@@ -121,12 +121,12 @@ simulation <- function (number_of_words){
     }
     ## else, just print the lowercase word.
     else{
-      cat(b[i])                                                   ##Prints the original word in case it was no in the most common word list
+      cat(b[i])                                                   ## Prints the original word in case it was not in the most common word list
     }
-    cat(" ")                                                      ##Use for format. It generate spaces
+    cat(" ")                                                      ## Use for format. It generates spaces
   }
 }
 
 number_of_words = 50                                              ## number of words that we want to simulate
-simulation(number_of_words)                                       ## call the simulation function to generate text.
+simulation(number_of_words)                                       ## call the simulation function to generate text
     
