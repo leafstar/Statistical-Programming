@@ -53,15 +53,18 @@ simulation<-function(n = 5.5e6, ne = 10, nt = 150, gamma = 1/3, delta = 1/5, lam
 }
 
     #Step (2):Produce a plot showing how the daily infection trajectories compare between the whole population, the ‘cautious 10%’ and the 0.1% random sample.
-a = Sys.time()
-epi <- simulation() ## run simulation
-b= Sys.time()
-print(b-a)
-plot(log(epi$I1),ylim=c(0,log(max(epi$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "infectious trend of 3 groups in log scale") ## S black
-points(log(epi$I2),col=4,cex=0.1);points(log(epi$I3),col=2,cex=0.1)  ## E (blue) and I (red);
-legend(1, 15, legend=c("whole population", "cautious group", "random 0.1% group"),
-       col=c("black", "blue","red"), lty=1:2, cex=0.8)
 
+epi <- simulation() ## run simulation
+peak1 = which(epi$I1 == max(epi$I1))
+peak2 = which(epi$I2 == max(epi$I2))
+peak3 = which(epi$I3 == max(epi$I3))
+plot(log(epi$I1),ylim=c(0,log(max(epi$I1))+5),xlab="day",ylab="log(new infection)",cex=0.1, main = "infectious trend of 3 groups in log scale") ## S black
+points(log(epi$I2),col=4,cex=0.1);points(log(epi$I3),col=2,cex=0.1)  ## E (blue) and I (red);
+legend(0, 15, legend=c("whole population", "cautious group", "random 0.1% group"),
+       col=c("black", "blue","red"), lty=1:2, cex=0.8)
+text(peak1,log(max(epi$I1)),peak1)
+text(peak2,log(max(epi$I2)),peak2)
+text(peak3,log(max(epi$I3)),peak3)
   ##Step (3):Run 10 replicate simulations for each groups 
 #The aim of this loop is tp generate the 10 simulations and then create a vector that stores the 10 outputs
 epi10=list()
