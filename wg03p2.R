@@ -59,27 +59,36 @@ legend(1, 15, legend=c("whole population", "cautious group", "random 0.1% group"
        col=c("black", "blue","red"), lty=1:2, cex=0.8)
 
 
-plot(Ssam[[i]], main=paste0("bias (degree=", cset[i],") from S1,..,S9"), 
-     xlab = xnam, ylab = ynam, pch=19, col=0, ylim=c(-0.2,0.2), xlim=xlim)
 
-epi10=c()
+epi10=list()
 for (i in 1:10){
-  epi10 = c(epi10,simulation())
+  epi10[[length(epi10)+1]] <- simulation()
 }
 
-plot(log(epi$I1),ylim=c(0,log(max(epi$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population")
-for (i in 1:10) {
-  points(log(epi10[i]$I1),col=4,cex=0.1)
+
+## plot for whole pop
+plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population",type="l")
+for (i in 2:10) {
+  
+  lines(1:nt,log(epi10[[i]]$I1), col = rainbow(10)[i])
+  
 }
 
-plot(log(epi$I2),ylim=c(0,log(max(epi$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group")
-for (i in 1:10) {
-  points(log(epi10[i]$I2),col=4,cex=0.1)
+## for cautious 
+plot(log(epi10[[1]]$I2),ylim=c(0,log(max(epi10[[1]]$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group",type="l")
+for (i in 2:10) {
+  
+  lines(1:nt,log(epi10[[i]]$I2), col = rainbow(10)[i])
+  
 }
 
-plot(log(epi$I3),ylim=c(0,log(max(epi$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = ".1% group")
-for (i in 1:10) {
-  points(log(epi10[i]$I3),col=4,cex=0.1)
+
+## for 0.1% 
+plot(log(epi10[[1]]$I3),ylim=c(0,log(max(epi10[[1]]$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = "0.1% group",type="l")
+for (i in 2:10) {
+  
+  lines(1:nt,log(epi10[[i]]$I3), col = rainbow(10)[i])
+  
 }
 
 
