@@ -51,8 +51,11 @@ simulation<-function(n = 5.5e6, ne = 10, nt = 150, gamma = 1/3, delta = 1/5, lam
 ## Step (2) Recorded the number of new infections among the 10% of the population with the lowest transmission rates
 
    ## I think we should do this step somewhere in the end.
-epi <- simulation() ## run simulation
 
+a = Sys.time()
+epi <- simulation() ## run simulation
+b= Sys.time()
+print(b-a)
 plot(log(epi$I1),ylim=c(0,log(max(epi$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "infectious trend of 3 groups in log scale") ## S black
 points(log(epi$I2),col=4,cex=0.1);points(log(epi$I3),col=2,cex=0.1)  ## E (blue) and I (red);
 legend(1, 15, legend=c("whole population", "cautious group", "random 0.1% group"),
@@ -65,20 +68,18 @@ for (i in 1:10){
   epi10[[length(epi10)+1]] <- simulation()
 }
 
-
+xlim = 150
 ## plot for whole pop
 plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population",type="l")
 for (i in 2:10) {
-  
-  lines(1:nt,log(epi10[[i]]$I1), col = rainbow(10)[i])
-  
+  lines(1:xlim,log(epi10[[i]]$I1), col = rainbow(10)[i])
 }
 
 ## for cautious 
 plot(log(epi10[[1]]$I2),ylim=c(0,log(max(epi10[[1]]$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group",type="l")
 for (i in 2:10) {
   
-  lines(1:nt,log(epi10[[i]]$I2), col = rainbow(10)[i])
+  lines(1:xlim,log(epi10[[i]]$I2), col = rainbow(10)[i])
   
 }
 
@@ -86,13 +87,8 @@ for (i in 2:10) {
 ## for 0.1% 
 plot(log(epi10[[1]]$I3),ylim=c(0,log(max(epi10[[1]]$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = "0.1% group",type="l")
 for (i in 2:10) {
-  
-  lines(1:nt,log(epi10[[i]]$I3), col = rainbow(10)[i])
-  
+  lines(1:xlim,log(epi10[[i]]$I3), col = rainbow(10)[i])
 }
-
-
-
 
 
 
