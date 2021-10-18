@@ -62,20 +62,20 @@ legend(1, 15, legend=c("whole population", "cautious group", "random 0.1% group"
        col=c("black", "blue","red"), lty=1:2, cex=0.8)
 
 
-
+#The aim of this loop is tp generate the 10 simulations and then create a vector that stores the 10 outputs
 epi10=list()
 for (i in 1:10){
   epi10[[length(epi10)+1]] <- simulation()
 }
 
 xlim = 150
-## plot for whole pop
+## plot for whole population
 plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population",type="l")
 for (i in 2:10) {
   lines(1:xlim,log(epi10[[i]]$I1), col = rainbow(10)[i])
 }
 
-## for cautious 
+## Plot for the 10% of the population
 plot(log(epi10[[1]]$I2),ylim=c(0,log(max(epi10[[1]]$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group",type="l")
 for (i in 2:10) {
   
@@ -84,7 +84,7 @@ for (i in 2:10) {
 }
 
 
-## for 0.1% 
+## Plot for 0.1% of the population 
 plot(log(epi10[[1]]$I3),ylim=c(0,log(max(epi10[[1]]$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = "0.1% group",type="l")
 for (i in 2:10) {
   lines(1:xlim,log(epi10[[i]]$I3), col = rainbow(10)[i])
