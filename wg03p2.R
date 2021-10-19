@@ -73,7 +73,7 @@ text(peak1,log(max(epi$I1)),peak1)                                ##Label in the
 text(peak2,log(max(epi$I2)),peak2)                                ##Label in the peak day for the 10% of the population
 text(peak3,log(max(epi$I3)),peak3)                                ##Label in the peak day for the 0.1% of population
 
-  ##Step (3):Run 10 replicate simulations for each groups, the aim of this loop is tp generate the 10 simulations and then create a vector that stores the 10 outputs
+  ##Step (3):Run 10 replicate simulations for each groups, the aim of this loop is to generate the 10 simulations and then create a vector that stores the 10 outputs
 
 epi10=list()                                                      ##Create an empty list to store the values of the simulation
 for (i in 1:10){                                                  ##indicate in the for loop that the simulation has to run 1o times
@@ -84,12 +84,20 @@ for (i in 1:10){                                                  ##indicate in 
 
 xlim = 150
 ##(4.1) PLOT WHOLE POPULATION
+#This plot shows the 10 simulations for the whole population. The peaks in the graph 
+#indicates the day of the maximum number of infected people, based on that sample size
+#The for loop helps us to plot the 10 lines with different colors in order to 
+#be able to distinguish the variations
 plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population",type="l")
 for (i in 2:10) {
   lines(1:xlim,log(epi10[[i]]$I1), col = rainbow(10)[i])
 }
 
 ##(4.2) PLOT FOR THE CAUTIONS GROUP 10% OF THE POPULATION
+#This plot shows the 10 simulations for the cautions group. The peak in the graph 
+#indicates the day of the maximum number of infected people, based on that sample size
+#The for loop helps us to plot the 10 lines with different colors in order to 
+#be able to distinguish the variations
 plot(log(epi10[[1]]$I2),ylim=c(0,log(max(epi10[[1]]$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group",type="l")
 for (i in 2:10) {
   
@@ -98,6 +106,10 @@ for (i in 2:10) {
 }
 
 ##(4.3) PLOT FOR RANDOM SAMPLE OF 0.1% OF THE POPULATION 
+#This plot shows the 10 simulations for the 0.1% of the total population. The peak in the graph 
+#indicates the day of the maximum number of infected people, based on that sample size
+#The for loop helps us to plot the 10 lines with different colors in order to 
+#be able to distinguish the variations in the data
 plot(log(epi10[[1]]$I3),ylim=c(0,log(max(epi10[[1]]$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = "0.1% group",type="l")
 for (i in 2:10) {
   lines(1:xlim,log(epi10[[i]]$I3), col = rainbow(10)[i])
