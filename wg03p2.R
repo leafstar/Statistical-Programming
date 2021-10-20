@@ -41,29 +41,37 @@ simulation<-function(n = 5.5e6, ne = 10, nt = 150, gamma = 1/3, delta = 1/5, lam
   
   beta <- rlnorm(n,0,0.5); beta <- beta/mean(beta)                ## generate contact rate with other people
   cautious_group = which(beta <= quantile(beta, 0.1))             ## 10% of the most cautious group
-  random_group = sample(1:n, n/1000)                              ## creat random sample of 0.1% of the population
+  random_group = sample(1:n, n/1000)                              ## create random sample of 0.1% of the population
   initial_exposure = sample(1:n, ne)                              ## start with a sample of 10 people in E state
   x[initial_exposure] = 1                                         ## The exposed group is going to be inserted to the initialize vector
   I1 <- I2 <- I3 <- rep(0, nt)                                    ## set up storage for number of infective people for the 3 groups
+  S_ind = which(x == 0); E_ind = initial_exposure; I_ind = c(); R_ind = c(); 
   for (i in 2:nt){                                                ## loop over 150 days
-    u <- runif(n)                                                 ## uniform random deviates
-    exposed_prob = lambda * beta * sum(beta[x==2])                ## daily chance of a transmission between infected person i and uninfected person j
-    x[x==2 & u<delta] <- 3                                        ## Change from state I -> R with prob delta
-    x[x==1 & u<gamma] <- 2                                        ## Change from state E -> I with prob gamma
-    x[x==0 & u<exposed_prob] <- 1                                 ## Change from state S -> E with prob 'exposed_prob'
+    u_stoe <- runif(length(S_ind))                                                 ## uniform random deviates
+    u_etoi <- runif(length(E_ind)) 
+    u_itor <- runif(length(I_ind)) 
+    exposed_prob = lambda * beta * sum(beta[I_ind])                ## daily chance of a transmission between infected person i and uninfected person j
+    #R_ind = x[I_ind & u<delta] ; I_ind =  I_ind[! I_ind  %in% remove]                                     ## Change from state I -> R with prob delta
+    R_ind = c(R_ind, I_ind[u_itor< delta]); I_ind = I_ind[! I_ind %in% R_ind]
+    I_ind = c(I_ind, E_ind[u_etoi< gamma]); E_ind = E_ind[! E_ind  %in% I_ind]                          ## Change from state E -> I with prob gamma
+    E_ind = c(E_ind,S_ind[u_stoe<exposed_prob[S_ind]]); S_ind = S_ind[! S_ind  %in% E_ind]                                    ## Change from state S -> E with prob 'exposed_prob'
     
     ## Record of the number of new infections (as x == 2) each day for the 3 chosen groups
     
-    I1[i] <- sum(x==2);                                           ## Record of Infective for total population
-    I2[i] <- sum(x[cautious_group]==2);                           ## Record of Infective for cautiouse group
-    I3[i] <- sum(x[random_group]==2);                             ## Record of Infective for random sample of 0.1% of the population
+    I1[i] <- length(I_ind);                                           ## Record of Infective for total population
+    I2[i] <- sum(I_ind %in% cautious_group);                           ## Record of Infective for cautiouse group
+    I3[i] <- sum(I_ind %in% random_group);                             ## Record of Infective for random sample of 0.1% of the population
+    #print(length(R_ind)+length(I_ind)+length(E_ind)+length(S_ind))
   }
   list(I1=I1,I2=I2,I3=I3,beta=beta)
 }
 
 #Step (2):Produce a plot showing how the daily infection trajectories compare between the whole population, the ‘cautious 10%’ and the 0.1% random sample.
-
-epi <- simulation()                                               ## run simulation
+a<-Sys.time()
+epi <- simulation() 
+b<-Sys.time()
+print(b-a)
+## run simulation
 peak1 = which(epi$I1 == max(epi$I1))                              ## Day of the maximun Infected people in the whole population
 peak2 = which(epi$I2 == max(epi$I2))                              ## Day of the maximun Infected people in the 10% population
 peak3 = which(epi$I3 == max(epi$I3))                              ## Day of the maximun Infected people in the 0.1% of the population
