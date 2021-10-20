@@ -35,55 +35,53 @@ simulation<-function(n = 5.5e6, ne = 10, nt = 150, gamma = 1/3, delta = 1/5, lam
   ## states: 0 -> S(Susceptible); 1 -> E(Exposed); 
   ##         2 -> I(Infective);   3 -> R(Recovery) 
   ## n = population size of 5.5e6; ne =initial exposed 10 randomly chosen people; nt = number of days: 150; 
-  ## gamma=daily prob E->I, delta=daily prob I->R lambda=Overall viral infectivity parameter.
-  
-  x <- rep(0,n)                                                   ## initialize to susceptible state 
-  
+  ## gamma=daily prob E->I, delta=daily prob I->R lambda = Overall viral infectivity parameter.
+                      
   beta <- rlnorm(n,0,0.5); beta <- beta/mean(beta)                ## generate contact rate with other people
   cautious_group = which(beta <= quantile(beta, 0.1))             ## 10% of the most cautious group
   random_group = sample(1:n, n/1000)                              ## create random sample of 0.1% of the population
   initial_exposure = sample(1:n, ne)                              ## start with a sample of 10 people in E state
-  x[initial_exposure] = 1                                         ## The exposed group is going to be inserted to the initialize vector
   I1 <- I2 <- I3 <- rep(0, nt)                                    ## set up storage for number of infective people for the 3 groups
-  S_ind = which(x == 0); E_ind = initial_exposure; I_ind = c(); R_ind = c(); 
+  S_ind = 1:n; E_ind = initial_exposure; I_ind = c(); R_ind = c(); 
   for (i in 2:nt){                                                ## loop over 150 days
-    u_stoe <- runif(length(S_ind))                                                 ## uniform random deviates
+    u_stoe <- runif(length(S_ind))                          ## uniform random deviates
     u_etoi <- runif(length(E_ind)) 
     u_itor <- runif(length(I_ind)) 
     exposed_prob = lambda * beta * sum(beta[I_ind])                ## daily chance of a transmission between infected person i and uninfected person j
-    #R_ind = x[I_ind & u<delta] ; I_ind =  I_ind[! I_ind  %in% remove]                                     ## Change from state I -> R with prob delta
-    R_ind = c(R_ind, I_ind[u_itor< delta]); I_ind = I_ind[! I_ind %in% R_ind]
-    I_ind = c(I_ind, E_ind[u_etoi< gamma]); E_ind = E_ind[! E_ind  %in% I_ind]                          ## Change from state E -> I with prob gamma
-    E_ind = c(E_ind,S_ind[u_stoe<exposed_prob[S_ind]]); S_ind = S_ind[! S_ind  %in% E_ind]                                    ## Change from state S -> E with prob 'exposed_prob'
+                                    
+    R_ind = c(R_ind, I_ind[u_itor< delta]); I_ind = I_ind[! I_ind %in% R_ind]     ## Change from state I -> R with prob delta
+    I_ind = c(I_ind, E_ind[u_etoi< gamma]); E_ind = E_ind[! E_ind %in% I_ind]         ## Change from state E -> I with prob gamma
+    E_ind = c(E_ind, S_ind[u_stoe<exposed_prob[S_ind]]); S_ind = S_ind[! S_ind %in% E_ind]    ## Change from state S -> E with prob 'exposed_prob'
     
-    ## Record of the number of new infections (as x == 2) each day for the 3 chosen groups
+    ## Record of the number of new infections each day for the 3 chosen groups
     
     I1[i] <- length(I_ind);                                           ## Record of Infective for total population
-    I2[i] <- sum(I_ind %in% cautious_group);                           ## Record of Infective for cautiouse group
+    I2[i] <- sum(I_ind %in% cautious_group);                           ## Record of Infective for cautious group
     I3[i] <- sum(I_ind %in% random_group);                             ## Record of Infective for random sample of 0.1% of the population
-    #print(length(R_ind)+length(I_ind)+length(E_ind)+length(S_ind))
   }
   list(I1=I1,I2=I2,I3=I3,beta=beta)
 }
 
 #Step (2):Produce a plot showing how the daily infection trajectories compare between the whole population, the ‘cautious 10%’ and the 0.1% random sample.
 a<-Sys.time()
-epi <- simulation() 
+epi <- simulation()
 b<-Sys.time()
 print(b-a)
 ## run simulation
-peak1 = which(epi$I1 == max(epi$I1))                              ## Day of the maximun Infected people in the whole population
-peak2 = which(epi$I2 == max(epi$I2))                              ## Day of the maximun Infected people in the 10% population
-peak3 = which(epi$I3 == max(epi$I3))                              ## Day of the maximun Infected people in the 0.1% of the population
-plot(epi$I1/max(epi$I1),ylim=c(0,1.1),xlab="day",ylab="log(new infection)",lwd=3, main = "infectious trend of 3 groups in log scale",type = "l") 
+peak1 = which(epi$I1 == max(epi$I1))                              ## Day of the maximum Infected people in the whole population
+peak2 = which(epi$I2 == max(epi$I2))                              ## Day of the maximum Infected people in the 10% population
+peak3 = which(epi$I3 == max(epi$I3))                              ## Day of the maximum Infected people in the 0.1% of the population
+plot(epi$I1/max(epi$I1),ylim=c(0,1.1),xlab="day",ylab="standardized quantity",
+     lwd=3, main = "Infectious trend of 3 groups",type = "l") 
 lines(1:150,epi$I2/max(epi$I2),col=4,lwd=3)
 lines(1:150,epi$I3/max(epi$I3),col=2,lwd=3)                   
 legend(0, 1, legend=c("whole population", "cautious group", "random 0.1% group"),
        col=c("black", "blue","red"), lty=1, lwd=3,cex =0.75)            ## E (blue)  I (red) S black;
-text(peak1-10,1,peak1,col = 1)                                ## Label in the peak day of the whole population
-text(peak2+10,1,peak2, col = 4)                                ## Label in the peak day for the 10% of the population
-text(peak3,1.1,peak3, col = 2)                                ## Label in the peak day for the 0.1% of population
-text()
+text(peak1-10,1, peak1, col = 1)                                ## Label in the peak day of the whole population
+text(peak2+10,1, peak2, col = 4)                                ## Label in the peak day for the 10% of the population
+text(peak3,1.1, peak3, col = 2)                                ## Label in the peak day for the 0.1% of population
+text(40,0.4, "the colored numbers \nare the peak days")
+
 ##Step (3):Run 10 replicate simulations for each groups
 ## the aim of this loop is to generate the 10 simulations and then create a vector that stores the 10 outputs
 epi10=list()                                                      ## Create an empty list to store the values of the simulation
@@ -91,32 +89,32 @@ for (i in 1:10){                                                  ## indicate in
   epi10[[length(epi10)+1]] <- simulation()                        ## Store the outputs in a vector called epi10
 }
 
-##Step (4):Produce plots for 10 replicate simulations showing daily infection trajectories for the 1)whole population, the 2)‘cautious 10%’ and the 3)0.1% random sample.
+##Step (4):Produce plots for 10 replicate simulations showing daily infection trajectories for:
+# 1) the whole population, 2) the ‘cautious 10%’ and 3) the 0.1% random sample.
 
-#These plots show 10 simulations for above discussed three groups. The peaks in the graph indicates the day of the maximum number of infected people.
+#These plots show 10 simulations for above discussed three groups. 
+#The peaks in the graph indicates the day of the maximum number of infected people.
 #The for loop helps us to plot the 10 lines with different colors in order to distinguish variations. 
-xlim = 150
 
+xlim = 150 ## x limit for the graph
 ##(4.1) PLOT FOR THE WHOLE POPULATION
-plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),xlab="day",ylab="log(new infection)",cex=0.1, main = "whole population",type="l")
+plot(log(epi10[[1]]$I1),ylim=c(0,log(max(epi10[[1]]$I1))),
+     xlab="day",ylab="log(new infection)",cex=0.1, main = "10 simulations for 3 groups",type="l")
 for (i in 2:10) {
-  lines(1:xlim,log(epi10[[i]]$I1), col = rainbow(10)[1])
+  lines(1:xlim,log(epi10[[i]]$I1), col = 1)
 }
 
 ##(4.2) PLOT FOR THE CAUTIONS GROUP - 10% OF THE POPULATION
-#plot(log(epi10[[1]]$I2),ylim=c(0,log(max(epi10[[1]]$I2))),xlab="day",ylab="log(new infection)",cex=0.1, main = "cautious group",type="l")
 for (i in 1:10) {
-  
-  lines(1:xlim,log(epi10[[i]]$I2), col = rainbow(10)[2])
-  
+  lines(1:xlim,log(epi10[[i]]$I2), col = 3)
 }
 
 ##(4.3) PLOT FOR RANDOM SAMPLE OF 0.1% OF THE POPULATION 
-#plot(log(epi10[[1]]$I3),ylim=c(0,log(max(epi10[[1]]$I3))),xlab="day",ylab="log(new infection)",cex=0.1, main = "0.1% group",type="l")
 for (i in 1:10) {
-  lines(1:xlim,log(epi10[[i]]$I3), col = rainbow(10)[3])
+  lines(1:xlim,log(epi10[[i]]$I3), col = 2)
 }
-
+legend(0, 1, legend=c("whole population", "cautious group", "random 0.1% group"),
+       col=c("black", "blue","red"), lty=1, lwd=3,cex =0.75)            ## E (blue)  I (red) S black;
 
 #CONCLUSION OF THE PRACTICAL
 #
