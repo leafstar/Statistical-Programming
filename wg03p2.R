@@ -65,7 +65,7 @@ epi <- simulation()                                               ## run simulat
 peak1 = which(epi$I1 == max(epi$I1))                              ## Day of the maximun Infected people in the whole population
 peak2 = which(epi$I2 == max(epi$I2))                              ## Day of the maximun Infected people in the 10% population
 peak3 = which(epi$I3 == max(epi$I3))                              ## Day of the maximun Infected people in the 0.1% of the population
-plot(log(epi$I1),ylim=c(0,log(max(epi$I1))+5),xlab="day",ylab="log(new infection)",cex=0.1, main = "infectious trend of 3 groups in log scale") 
+plot(log(epi$I1),ylim=c(0,log(max(epi$I1))+2),xlab="day",ylab="log(new infection)",cex=0.1, main = "infectious trend of 3 groups in log scale") 
 points(log(epi$I2),col=4,cex=0.1);points(log(epi$I3),col=2,cex=0.1)                   ## E (blue)  I (red) S black;
 legend(0, 15, legend=c("whole population", "cautious group", "random 0.1% group"),
        col=c("black", "blue","red"), lty=1:2, cex=0.8)
