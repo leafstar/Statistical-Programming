@@ -1,8 +1,4 @@
-##                Group 3               ##
-## Muxing Wang (s2201749)               ##
-## Karla Itzel Vega Ortega (s2126801)   ##
-## Nutsa Tokhadze (s1778736)            ##
-##########################################
+## Group 3  Muxing Wang (s2201749); Nutsa Tokhadze (s1778736); Karla Itzel Vega Ortega (s2126801) 
 ## Address of github repo: https://github.com/leafstar/Statistical-Programming
 
                                                    ## Covid and the hazards of opportunistic sampling ##
