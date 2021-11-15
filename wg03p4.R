@@ -1,7 +1,7 @@
 #####  Karla Itzel Vega Ortega S2126801  #####
 #####  Muxing Wang S2201749              #####
 #####  Nutza Tokhadze S1778736           #####
- 
+
 # Task: to write an R function, bfgs, implementing the BFGS quasi-Newton minimization method.
 # BFGS optimization function should operate broadly in the same way as optim or nlm
 
@@ -31,80 +31,134 @@
 # 4. If the supplied f does not supply a gradient attribute when requested, then you 
 # should compute the gradient by finite differencing
 
-get_step_size<- function(f,theta,d){                        
+get_step_size <- function(f,theta,d){
+  upper_bound = 10
+  lower_bound = 0
+  max.iter = 20 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
+  iter = 0
+  eps = 1e-7
+  c1 = 0.1 # for cond1
+  c2 = 0.9 # we can discuss with simon about this since c2 is auto satisfied.
   alpha = 1
   theta.prime = theta + alpha*d
-  g = attributes(f(theta, TRUE))$gradient
-  g.prime = attributes(f(theta.prime, TRUE))$gradient
-  while(f(theta.prime) >= f(theta) ){
+  g = get_grad(f,theta,eps)
+  gamma = c1*sum(g*d) # for cond1 just as the video said
+  while(f(theta.prime) >= f(theta) + alpha* gamma && iter <= max.iter){
+    iter = iter + 1
     alpha = alpha/2
     theta.prime = theta + alpha*d
   }
-  #|| g.prime %*% d /(g %*% d)
+  #print(iter)
+  cat("alhpagamma",alpha* gamma,"\n")
+  print(theta)
+  
+  cat("rhs",f(theta) + alpha* gamma,"\n")
+  print(theta.prime)
+  ## we dont need these two lines guys, just to check if the ratio is less than c2.
+  g.prime = get_grad(f, theta.prime, eps)
+  print(g.prime %*% d /(g %*% d) <= c2)
+  
+  if(f(theta.prime) > f(theta)) warning("we cannot find a valid step size")
+  
   alpha
 }
 
+get_grad <- function(f,theta,eps){
+  if(is.null(attributes(f(theta, TRUE))$gradient)){
+    ## finite differencing
+    grad = theta
+    for (i in 1:length(theta)) { ## loop over parameters
+      theta1 <- theta; theta1[i] <- theta1[i] + eps ## increase th0[i] by eps nll1 <- nll(th1,t=t80,y=y) ## compute resulting nll
+      grad[i] <- (f(theta1) - f(theta))/eps ## approximate -dl/dth[i]
+    }
+    as.vector(grad)
+  }else{
+    g.k = attributes(f(theta, TRUE))$gradient
+  }
+}
+
 bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
-  
   theta.k = theta
   B.k <- I <- diag(length(theta))
   f0 = f(theta.k)
-  g.k = attributes(f(theta.k, TRUE))$gradient
+  eps = 1e-7 ## finite difference interval
+  g.k = get_grad(f, theta.k, eps) ## initialize a random gradient
+  
+  if(any(is.infinite(g.k))) stop("gradient is not finite")
+  if(is.infinite(f0)) stop("objective value is not finite")
+  
   iter = 0
+  
   while(max(abs(g.k)) >= (abs(f0)+fscale)*tol && iter <= maxit){
     f0 = f(theta.k)
-    g.k = attributes(f(theta.k, TRUE))$gradient
     
+    
+    g.k = get_grad(f, theta.k, eps)
     
     
     d = -B.k %*% g.k
     
-    #cond2(rb,theta.k,d)
     
     alpha = get_step_size(f, theta.k, d)
+    #print(alpha)   no need
+    theta.kprime = as.vector(theta.k + alpha * d)
     
-    theta.kprime = theta.k + alpha * d
-    g.kprime = attributes(f(theta.kprime, TRUE))$gradient
+    g.kprime = get_grad(f, theta.kprime, eps)
+    
+    
+    ## no need just checking the c2 condition
     print(g.kprime %*% d /(g.k %*% d))
+    
+    
     s.k = theta.kprime - theta.k
     y.k = g.kprime - g.k
-    rho.k = 1/sum(s.k*y.k)
     
-    B.kprime = (I - rho.k* s.k %*% t(y.k)) %*% B.k %*% (I - rho.k * y.k %*% t(s.k) ) + rho.k * s.k %*% t(s.k)
+    rho.k.i = sum(s.k*y.k)
+    rho.k = 1/rho.k.i
+    
+    ## faster implementation
+    B.kprime = B.k + ((rho.k.i+ as.vector(t(y.k)%*%B.k%*%y.k))*s.k %*% t(s.k))/(rho.k.i**2) - (B.k%*%y.k%*%t(s.k)+s.k%*%(t(y.k)%*%B.k))/rho.k.i
+    
     theta.k = theta.kprime
     B.k = B.kprime
     iter = iter + 1
     
   }
-  list(f=f, theta=theta.k, iter=iter, g=g.k, H=B.k)
+  
+  if(iter > maxit) warning("max iteration has been reached")
+  
+  
+  ## fast way to compute H as B^-1
+  H = chol2inv(chol(B.k))
+  
+  if (!isSymmetric(H)){
+    H <- 0.5 * (t(H) + H)
+  }
+  
+  cat("optim val", f(theta.k), "\n")
+  list(f=f, theta=theta.k, iter=iter, g=g.k, H=H)
 }
 
+#  end  of   implementation 
+########################
+########################
 
-rb <- function(theta,getg=FALSE,k=10) {
-  ## Rosenbrock objective function, suitable for use by Ã¢ÂÂbfgsÃ¢ÂÂ
-  z <- theta[1]; x <- theta[2]
-  f <- k*(z-x^2)^2 + (1-x)^2 + 1
-  if (getg) {
-    attr(f,"gradient") <- c(2*k*(z-x^2),
-                            -4*k*x*(z-x^2) -2*(1-x))
-  }
-  f
-} ## rb
+### just for test, will delete everything below this
 
 bfgs(c(-1,2),rb)
 
+f = beale
+init = c(-1,1)
+res1 = bfgs(init,f)
+res2 = optim(init,f,g,method = "BFGS", hessian = TRUE)
+res3 = nlm(f,init,hessian = TRUE)
 
-## I use this function to explore the relationship between step size and the wolfe conditionn2.
-## you may ignnore this.
-cond2<- function(f,theta,d){
-  alpha = seq(0,1,0.001)
-  ratio = c()
-  for (a in alpha){
-    theta.prime = theta + a*d
-    g = attributes(f(theta, TRUE))$gradient
-    g.prime = attributes(f(theta.prime, TRUE))$gradient
-    ratio = c(ratio, g.prime %*% d /(g %*% d))
-  }
-  plot(alpha,ratio)
-}
-cond2(rb,c(-1,2),-diag(2) %*% res$g)
+cat("theta", res1$theta,"\n", res2$par, "\n", res3$estimate, "\n")
+
+cat("hessian",res1$H,"\n", res2$hessian, "\n", res3$hessian,"\n")
+
+cat("num_iteration",res1$iter, ",", res3$iterations)
+
+cat(res2$value,",", res3$minimum,"\n")
+
+source("./p4_functions.R")
