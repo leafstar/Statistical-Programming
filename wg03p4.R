@@ -5,31 +5,27 @@
 setwd(dirname(rstudioapi::getSourceEditorContext()$path))
 
 get_step_size <- function(f,theta,d){
-  upper_bound = 2
+  upper_bound = 10
   lower_bound = 0
-  max.iter = 30
+  max.iter = 30 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
   iter = 0
   eps = 1e-7
-  c2 = 0.9
-  while(iter <= max.iter){
+  c1 = 0.1 # for cond1
+  c2 = 0.9 # we can discuss with simon about this since c2 is auto satisfied.
+  alpha = 1
+  theta.prime = theta + alpha*d
+  g = get_grad(f,theta,eps)
+  gamma = c1*sum(g*d) # for cond1 just as the video said
+  while(f(theta.prime) > f(theta) + alpha* gamma && iter <= max.iter){
     iter = iter + 1
-    alpha = (upper_bound + lower_bound) /2
+    alpha = alpha/2
     theta.prime = theta + alpha*d
-    g = get_grad(f,theta,eps)
-    g.prime = get_grad(f, theta.prime, eps)
-    
-    if(f(theta.prime) <= f(theta) && g.prime %*% d /(g %*% d) <= c2){
-      break ## a feasible alpha is found
-    }
-    if(f(theta.prime) > f(theta)){
-      upper_bound = alpha
-    }
-    
-    if(g.prime %*% d /(g %*% d) > c2){
-      lower_bound = alpha
-    }
   }
-
+  
+  ## we dont need these two lines guys, just to check if the ratio is less than c2.
+  g.prime = get_grad(f, theta.prime, eps)
+  print(g.prime %*% d /(g %*% d) <= c2)
+  
   if(f(theta.prime) > f(theta)) warning("we cannot find a valid step size")
   
   alpha
@@ -72,12 +68,16 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
 
     
     alpha = get_step_size(f, theta.k, d)
-    print(alpha)
+    #print(alpha)   no need
     theta.kprime = as.vector(theta.k + alpha * d)
 
     g.kprime = get_grad(f, theta.kprime, eps)
 
-    # print(g.kprime %*% d /(g.k %*% d))
+    
+    ## no need just checking the c2 condition
+    print(g.kprime %*% d /(g.k %*% d))
+    
+    
     s.k = theta.kprime - theta.k
     y.k = g.kprime - g.k
     
@@ -94,8 +94,9 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
   }
   
   if(iter > maxit) warning("max iteration has been reached")
-  ## compute H as B^-1
   
+  
+  ## fast way to compute H as B^-1
   H = chol2inv(chol(B.k))
   
   if (!isSymmetric(H)){
@@ -105,10 +106,11 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
   list(f=f, theta=theta.k, iter=iter, g=g.k, H=H)
 }
 
+#  end  of   implementation 
+########################
+########################
 
-
-
-### just for test, will delete this 
+### just for test, will delete everything below this
 rb <- function(theta,getg=FALSE,k=10) {
   ## Rosenbrock objective function, suitable for use by ’bfgs’
   z <- theta[1]; x <- theta[2]
@@ -133,8 +135,25 @@ bfgs(c(-1,2),rb)
 
 
 
+camel3 <- function(xx,getg = FALSE)
+{
+  ##########################################################################
 
+  
+  x1 <- xx[1]
+  x2 <- xx[2]
+  
+  term1 <- 2*x1^2
+  term2 <- -1.05*x1^4
+  term3 <- x1^6 / 6
+  term4 <- x1*x2
+  term5 <- x2^2
+  
+  y <- term1 + term2 + term3 + term4 + term5
+  return(y)
+}
 
+bfgs(c(-1,2),camel3)
 
 
 
