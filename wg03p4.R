@@ -31,14 +31,14 @@
 # 4. If the supplied f does not supply a gradient attribute when requested, then you 
 # should compute the gradient by finite differencing
 
-get_step_size <- function(f,theta,d){
+get_step_size <- function(f,theta,d){                    # Create a function called get_step_size with three inputs
   upper_bound = 10
   lower_bound = 0
-  max.iter = 20 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
-  iter = 0
-  eps = 1e-7
-  c1 = 0.1 # for cond1
-  c2 = 0.9 # we can discuss with simon about this since c2 is auto satisfied.
+  max.iter = 20                                          # Since we are doing a exponential decay, this bound is big enough for us to find a small step size.
+  iter = 0                                               # We initialize the iter value 
+  eps = 1e-7                                             
+  c1 = 0.1                                               # for cond1
+  c2 = 0.9    #we can discuss with simon about this since c2 is auto satisfied.
   alpha = 1
   theta.prime = theta + alpha*d
   g = get_grad(f,theta,eps)
