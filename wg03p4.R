@@ -36,8 +36,6 @@
 # 1 #
 
 get_step_size <- function(f,theta,d){
-  upper_bound = 10
-  lower_bound = 0
   max.iter = 20 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
   iter = 0
   eps = 1e-7
@@ -47,11 +45,10 @@ get_step_size <- function(f,theta,d){
   theta.prime = theta + alpha*d
   g = get_grad(f,theta,eps)
   gamma = c1*sum(g*d) # for cond1 just as the video said
-  cat("gamma",gamma,"\n")
   while(iter <= max.iter){
     iter = iter + 1
     g.prime = get_grad(f, theta.prime, eps)
-    if(f(theta.prime) < f(theta) + alpha* gamma && g.prime %*% d /(g %*% d) <= c2){
+    if(f(theta.prime) < f(theta) + alpha * gamma && g.prime %*% d /(g %*% d) <= c2){
       break
     }
     
@@ -64,8 +61,6 @@ get_step_size <- function(f,theta,d){
     }
     theta.prime = theta + alpha*d
   }
-  
-  print(g.prime %*% d /(g %*% d) <= c2)
   
   if(f(theta.prime) > f(theta)) warning("we cannot find a valid step size")
 
@@ -128,14 +123,11 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
     
     
     alpha = get_step_size(f, theta.k, d)
-    print(alpha)
+
     theta.kprime = as.vector(theta.k + alpha * d)
     
     g.kprime = get_grad(f, theta.kprime, eps)
     
-    
-    ## no need just checking the c2 condition
-    print(g.kprime %*% d /(g.k %*% d))
     
     
     s.k = theta.kprime - theta.k
@@ -164,30 +156,5 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
     H <- 0.5 * (t(H) + H)
   }
   
-  cat("optim val", f(theta.k), "\n")
   list(f=f, theta=theta.k, iter=iter, g=g.k, H=H)
 }
-
-#  end  of   implementation 
-########################
-########################
-
-### just for test, will delete everything below this
-
-bfgs(c(-1,2),rb)
-
-f = boha1
-init = c(-1,2)
-res1 = bfgs(init,f)
-res2 = optim(init,f,method = "BFGS", hessian = TRUE)
-res3 = nlm(f,init,hessian = TRUE)
-
-cat("theta", res1$theta,"\n", res2$par, "\n", res3$estimate, "\n")
-
-cat("hessian",res1$H,"\n", res2$hessian, "\n", res3$hessian,"\n")
-
-cat("num_iteration",res1$iter, ",", res3$iterations)
-
-cat(res2$value,",", res3$minimum,"\n")
-#setwd(dirname(rstudioapi::getSourceEditorContext()$path))
-#source("./p4_functions.R")
