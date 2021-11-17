@@ -3,7 +3,7 @@
 
 
                                                          ## A BFGS optimizer ##
-                                                             # Overview #
+                                                             ## Overview ##
 
 ## The aim of the project is to implement optimization with BFGS quasi-Newton minimization method. Maximum likelihood 
 ## optimization, and many other statistical learning approaches, rely on numerical optimization. Optimization is finding a 
