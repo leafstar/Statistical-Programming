@@ -35,24 +35,25 @@
 
 # 1 #
 
-get_step_size <- function(f,theta,d){
-  max.iter = 20 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
+get_step_size <- function(f,...,theta,d){
+  max.iter = 40 # since we are doing a exponential decay, this bound is big enough for us to find a small step size.
   iter = 0
   eps = 1e-7
   c1 = 0.1 # for cond1
   c2 = 0.9 # we can discuss with simon about this since c2 is auto satisfied.
   alpha = 1
   theta.prime = theta + alpha*d
-  g = get_grad(f,theta,eps)
+  g = get_grad(f = f,...,theta = theta,eps = eps)
   gamma = c1*sum(g*d) # for cond1 just as the video said
+  cat("alphagamma",gamma,"\n")
   while(iter <= max.iter){
     iter = iter + 1
-    g.prime = get_grad(f, theta.prime, eps)
-    if(f(theta.prime) < f(theta) + alpha * gamma && g.prime %*% d /(g %*% d) <= c2){
+    g.prime = get_grad(f = f,..., theta = theta.prime, eps = eps)
+    if(f(theta.prime,...) < f(theta,...) + alpha * gamma && g.prime %*% d /(g %*% d) <= c2){
       break
     }
     
-    if(f(theta.prime) >= f(theta) + alpha* gamma){
+    if(f(theta.prime,...) >= f(theta,...) + alpha* gamma){
       alpha = alpha/2
     }
     
@@ -62,25 +63,29 @@ get_step_size <- function(f,theta,d){
     theta.prime = theta + alpha*d
   }
   
-  if(f(theta.prime) > f(theta)) warning("we cannot find a valid step size")
-
+  if(f(theta.prime,...) >= f(theta,...)){
+    alpha=1
+    warning("we cannot find a valid step size")
+  }
+    
+  print(alpha)
   alpha
 }
 
 
 # 2 #
 
-get_grad <- function(f,theta,eps){
-  if(is.null(attributes(f(theta, TRUE))$gradient)){
+get_grad <- function(f,...,theta,eps){
+  if(is.null(attributes(f(theta, TRUE,...))$gradient)){
     ## finite differencing
     grad = theta
     for (i in 1:length(theta)) { ## loop over parameters
       theta1 <- theta; theta1[i] <- theta1[i] + eps ## increase th0[i] by eps nll1 <- nll(th1,t=t80,y=y) ## compute resulting nll
-      grad[i] <- (f(theta1) - f(theta))/eps ## approximate -dl/dth[i]
+      grad[i] <- (f(theta1,...) - f(theta,...))/eps ## approximate -dl/dth[i]
     }
     as.vector(grad)
   }else{
-    g.k = attributes(f(theta, TRUE))$gradient
+    g.k = attributes(f(theta, TRUE,...))$gradient
   }
 }
 
@@ -103,9 +108,9 @@ get_grad <- function(f,theta,eps){
 bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
   theta.k = theta
   B.k <- I <- diag(length(theta))
-  f0 = f(theta.k)
+  f0 = f(theta.k,...)
   eps = 1e-7 ## finite difference interval
-  g.k = get_grad(f, theta.k, eps) ## initialize a random gradient
+  g.k = get_grad(f=f , ...,theta = theta.k,eps =  eps) ## initialize a random gradient
   
   if(any(is.infinite(g.k))) stop("gradient is not finite")
   if(is.infinite(f0)) stop("objective value is not finite")
@@ -113,21 +118,21 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
   iter = 0
   
   while(max(abs(g.k)) >= (abs(f0)+fscale)*tol && iter <= maxit){
-    f0 = f(theta.k)
+    f0 = f(theta.k,...)
+    print(f0)
     
-    
-    g.k = get_grad(f, theta.k, eps)
+    g.k = get_grad(f = f,..., theta = theta.k, eps =  eps)
     
     
     d = -B.k %*% g.k
     
     
-    alpha = get_step_size(f, theta.k, d)
+    alpha = get_step_size(f = f,... ,theta = theta.k, d = d)
 
     theta.kprime = as.vector(theta.k + alpha * d)
-    
-    g.kprime = get_grad(f, theta.kprime, eps)
-    
+    cat("thetaprime",theta.kprime,"\n")
+    g.kprime = get_grad(f = f,..., theta = theta.kprime, eps = eps)
+    cat("gkprime",g.kprime,"\n")
     
     
     s.k = theta.kprime - theta.k
