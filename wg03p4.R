@@ -61,14 +61,6 @@ get_step_size <- function(f,theta,d){
     theta.prime = theta + alpha*d
   }
   
-  #print(iter)
-  #cat("alhpagamma",alpha* gamma,"\n")
-  #print(theta)
-  
-  #cat("rhs",f(theta) + alpha* gamma,"\n")
-  #print(theta.prime)
-  ## we dont need these two lines guys, just to check if the ratio is less than c2.
- 
   print(g.prime %*% d /(g %*% d) <= c2)
   
   if(f(theta.prime) > f(theta)) warning("we cannot find a valid step size")
