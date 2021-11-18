@@ -110,71 +110,76 @@ get_step_size <- function(f,...,theta,d){                    ## defines get_step
 
                                                               ## 3. Bfgs ##
 
-## bfgs function returns a (named) list containing: (1) f -the scalar value of the objective function at the minimum, 
-## (2) theta -the vector of values of the parameters at the minimum, (3) iter- the number of iterations taken to reach 
-## the minimum, (4) g - the gradient vector at the minimum and (5) H - the approximate Hessian matrix. Bfgs is a function of
-## 1.theta - a vector of initial values for the optimization parameters
-## 2.f- is the objective function to minimize.  Its first argument is the vector of optimization parameters. Its second
-## argument is a logical indicating whether or not gradients of the objective w.r.t. the parameters should be computed
-## Remaining arguments are passed from bfgs using ‘...’.
+## bfgs function returns a (named) list containing: 
+## (1) f -the scalar value of the objective function at the minimum, 
+## (2) theta -the vector of values of the parameters at the minimum, 
+## (3) iter- the number of iterations taken to reach the minimum, 
+## (4) g - the gradient vector at the minimum and,
+## (5) H - the approximate Hessian matrix. 
+## Bfgs is a function of
+##     1.theta - a vector of initial values for the optimization parameters
+##     2.f- is the objective function to minimize.  Its first argument is the vector of optimization parameters. Its second
+##       argument is a logical indicating whether or not gradients of the objective w.r.t. the parameters should be computed
+## NOTE Remaining arguments are passed from bfgs using ‘...’.
 ## tol is the convergence tolerance
 ## fscale is a rough estimate of the magnitude of f at the optimum - used in convergence testing
 ## maxit is the maximum number of BFGS iterations to try before giving up
-bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
-  theta.k = theta
-  B.k <- I <- diag(length(theta))
-  f0 = f(theta.k,...)
-  eps = 1e-7 ## finite difference interval
-  g.k = get_grad(f=f , ...,theta = theta.k,eps =  eps) ## initialize a random gradient
+
+
+bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){               ## create the function "bfgs" with 5 initial inputs
+  theta.k = theta                                                        ## theta is a vector of initial values for the optimization parameters         
+  B.k <- I <- diag(length(theta))                                        ## create an Identity matrix based on the len of theta
+  f0 = f(theta.k,...)                                                    ## value of the objective
+  eps = 1e-7                                                             ## finite difference interval
+  g.k = get_grad(f=f , ...,theta = theta.k,eps =  eps)                   ## initialize a random gradient
   
-  if(any(is.infinite(g.k))) stop("gradient is not finite") ## 
-  if(is.infinite(f0)) stop("objective value is not finite")
+  if(any(is.infinite(g.k))) stop("gradient is not finite")               ## stop if the gradient tends to infinite (not finite)
+  if(is.infinite(f0)) stop("objective value is not finite")              ## stop if the objective or derivatives are not finite at the initial theta;
   
-  iter = 0
+  iter = 0                                                               ## Initialize the iter value 
   
-  while(max(abs(g.k)) >= (abs(f0)+fscale)*tol && iter <= maxit){
-    f0 = f(theta.k,...)
+  while(max(abs(g.k)) >= (abs(f0)+fscale)*tol && iter <= maxit){         ## Suitable condition for convergence if the gradiente is bigger equal to abs(f0)+fscale)*tol or the number of iter is less equal to the max do the while
+    f0 = f(theta.k,...)                                                  ## value of the objective
     print(f0)
     
-    g.k = get_grad(f = f,..., theta = theta.k, eps =  eps)
+    g.k = get_grad(f = f,..., theta = theta.k, eps =  eps)               ## re calculate the gradiente
     
     
-    d = -B.k %*% g.k
+    d = -B.k %*% g.k                                                     ## calculate the direction with the identity matrix x the gradiente 
     
     
-    alpha = get_step_size(f = f,... ,theta = theta.k, d = d)
+    alpha = get_step_size(f = f,... ,theta = theta.k, d = d)             ## we called the function created in part 2 where the return is the alpha value
 
-    theta.kprime = as.vector(theta.k + alpha * d)
-    cat("thetaprime",theta.kprime,"\n")
-    g.kprime = get_grad(f = f,..., theta = theta.kprime, eps = eps)
-    cat("gkprime",g.kprime,"\n")
+    theta.kprime = as.vector(theta.k + alpha * d)                        ## create theta prime with the values of theta, alpha and direction
+    cat("thetaprime",theta.kprime,"\n")                                  ## print the theta.kprime value
+    g.kprime = get_grad(f = f,..., theta = theta.kprime, eps = eps)      ## get the gradient kprime from the get grad function
+    cat("gkprime",g.kprime,"\n")                                         ## print the gradient.kprime value   
     
     
-    s.k = theta.kprime - theta.k
-    y.k = g.kprime - g.k
+    s.k = theta.kprime - theta.k                                         ## sk = θ[k+1] − θ[k] 
+    y.k = g.kprime - g.k                                                 ## yk = ∇D(θ[k+1]) − ∇D(θ[k])
     
     rho.k.i = sum(s.k*y.k)
     rho.k = 1/rho.k.i
     
     
-    ## faster implementation
+    ## faster implementation for the  BFGS update is: 
     B.kprime = B.k + ((rho.k.i+ as.vector(t(y.k)%*%B.k%*%y.k))*s.k %*% t(s.k))/(rho.k.i**2) - (B.k%*%y.k%*%t(s.k)+s.k%*%(t(y.k)%*%B.k))/rho.k.i
     
-    theta.k = theta.kprime
-    B.k = B.kprime
-    iter = iter + 1
+    theta.k = theta.kprime                                              ## update theta value
+    B.k = B.kprime                                                      ## update B.k value 
+    iter = iter + 1                                                     ## sum one steps to the while
     
   }
   
-  if(iter > maxit) warning("max iteration has been reached")
+  if(iter > maxit) warning("max iteration has been reached")            ## error if maximum of iterations has been reached without convergence.
   
   
-  ## fast way to compute H as B^-1
-  H = chol2inv(chol(B.k))
+  H = chol2inv(chol(B.k))                                              ## fast way to compute H as B^-1
   
-  if (!isSymmetric(H)){ ## if 
-    H <- 0.5 * (t(H) + H)
+  if (!isSymmetric(H)){                                                ## if the Hessian is not symmetric then approximate the Hessian
+    H <- 0.5 * (t(H) + H)                                              ## The approximate Hessian matrix (obtained by finite differencing) at the minimum
   }
   
-  list(f=f, theta=theta.k, iter=iter, g=g.k, H=H) # returns list of 
+  list(f=f, theta=theta.k, iter=iter, g=g.k, H=H)                      # returns list of function, theta value, number of iterations, gradiente vector and Hessian
 }
